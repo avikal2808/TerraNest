@@ -7,7 +7,7 @@ spring:
   datasource:
     url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nest}
     username: ${DB_USER:postgres}
-    password: ${DB_PASS:avikal}
+    password: ${DB_PASS:}
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -66,6 +66,6 @@ resilience4j:
         permitted-number-of-calls-in-half-open-state: 3
 
 jwt:
-  secret: ${JWT_SECRET:terraNestSuperSecretKey2026ForJwtSigningMustBe256BitsLong}
+  secret: ${JWT_SECRET}
   expiration-ms: 86400000  # 24 hours
 
