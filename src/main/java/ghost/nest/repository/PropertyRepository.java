@@ -15,4 +15,12 @@ public interface PropertyRepository extends JpaRepository<Property, Long> {
     List<Property> findPropertiesWithinRadius(@Param("lat") Double lat,
                                               @Param("lng") Double lng,
                                               @Param("radius") Double radiusMeters);
+
+    @Query(value = "SELECT ST_X(ST_SnapToGrid(location, :gridSize)) as lng, " +
+                   "ST_Y(ST_SnapToGrid(location, :gridSize)) as lat, " +
+                   "COUNT(*) as count, " +
+                   "AVG(price) as avg_price " +
+                   "FROM properties " +
+                   "GROUP BY ST_SnapToGrid(location, :gridSize)", nativeQuery = true)
+    List<Object[]> aggregatePropertiesByGrid(@Param("gridSize") Double gridSize);
 }

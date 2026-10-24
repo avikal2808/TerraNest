@@ -16,4 +16,14 @@ public interface CrimeDataRepository extends JpaRepository<CrimeData, Long> {
                                            @Param("lng") Double lng,
                                            @Param("radius") Double radiusMeters,
                                            @Param("since") java.time.LocalDateTime since);
+
+    @Query(value = "SELECT *, ST_Distance(location::geography, ST_SetSRID(ST_MakePoint(:lng, :lat), 4326)::geography) as distance " +
+                   "FROM crime_data " +
+                   "WHERE timestamp >= :since " +
+                   "ORDER BY location <-> ST_SetSRID(ST_MakePoint(:lng, :lat), 4326) " +
+                   "LIMIT :limit", nativeQuery = true)
+    List<Object[]> findNearestRecentWithDistance(@Param("lat") Double lat, 
+                                                 @Param("lng") Double lng, 
+                                                 @Param("since") java.time.LocalDateTime since,
+                                                 @Param("limit") int limit);
 }

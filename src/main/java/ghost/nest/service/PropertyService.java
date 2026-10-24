@@ -1,5 +1,6 @@
 package ghost.nest.service;
 
+import ghost.nest.dto.HeatmapPointDTO;
 import ghost.nest.dto.PropertyRequestDTO;
 import ghost.nest.dto.PropertyResponseDTO;
 import ghost.nest.entity.Property;
@@ -47,6 +48,19 @@ public class PropertyService {
         List<Property> properties = propertyRepository.findPropertiesWithinRadius(lat, lng, radius);
         return properties.stream()
                 .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    public List<HeatmapPointDTO> getHeatmapData(Double gridSize) {
+        double size = gridSize != null ? gridSize : 0.001; // ~111m at equator
+        List<Object[]> results = propertyRepository.aggregatePropertiesByGrid(size);
+        return results.stream()
+                .map(row -> HeatmapPointDTO.builder()
+                        .longitude((Double) row[0])
+                        .latitude((Double) row[1])
+                        .intensity(((Long) row[2]).doubleValue()) // count
+                        .weight((Double) row[3]) // avg price
+                        .build())
                 .collect(Collectors.toList());
     }
 

@@ -11,6 +11,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/properties")
@@ -56,6 +58,27 @@ public class PropertyController {
             @RequestParam Double lng,
             @RequestParam(required = false) Double radius) {
         return ResponseEntity.ok(propertyService.searchPropertiesByLocation(lat, lng, radius));
+    }
+
+    @GetMapping("/search/geojson")
+    public ResponseEntity<Map<String, Object>> searchPropertiesGeoJson(
+            @RequestParam Double lat,
+            @RequestParam Double lng,
+            @RequestParam(required = false) Double radius) {
+        List<PropertyResponseDTO> properties = propertyService.searchPropertiesByLocation(lat, lng, radius);
+        List<Map<String, Object>> features = properties.stream()
+                .map(PropertyResponseDTO::toGeoJson)
+                .collect(Collectors.toList());
+        
+        return ResponseEntity.ok(Map.of(
+            "type", "FeatureCollection",
+            "features", features
+        ));
+    }
+
+    @GetMapping("/heatmap")
+    public ResponseEntity<List<HeatmapPointDTO>> getHeatmapData(@RequestParam(required = false) Double gridSize) {
+        return ResponseEntity.ok(propertyService.getHeatmapData(gridSize));
     }
 
     @GetMapping("/{id}/livability")
