@@ -1,0 +1,55 @@
+databases:
+  - name: nest-db
+    databaseName: nest
+    user: nest
+    plan: free
+    region: singapore
+
+services:
+  # Redis-compatible cache (spring.cache.type=redis)
+  - type: keyvalue
+    name: nest-cache
+    plan: free
+    region: singapore
+    ipAllowList: [] # internal-only: no access from outside Render
+    maxmemoryPolicy: allkeys-lru
+
+  - type: web
+    name: nest-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /actuator/health
+    envVars:
+      # Postgres connection parts (Render hands out a postgresql:// URL, but
+      # Spring needs jdbc:postgresql://, so the app assembles it from parts)
+      - key: DB_HOST
+        fromDatabase:
+          name: nest-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: nest-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: nest-db
+          property: database
+      - key: DB_USER
+        fromDatabase:
+          name: nest-db
+          property: user
+      - key: DB_PASS
+        fromDatabase:
+          name: nest-db
+          property: password
+      # redis://red-xxxxx:6379
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: nest-cache
+          property: connectionString
+      # Generated 256-bit secret; overrides the dev placeholder in application.yml
+      - key: JWT_SECRET
+        generateValue: true
