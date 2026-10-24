@@ -32,6 +32,24 @@ public class PropertyController {
         return ResponseEntity.ok(propertyService.getPropertyById(id));
     }
 
+    @GetMapping
+    public ResponseEntity<List<PropertyResponseDTO>> getAllProperties() {
+        return ResponseEntity.ok(propertyService.getAllProperties());
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<PropertyResponseDTO> updateProperty(
+            @PathVariable Long id,
+            @Valid @RequestBody PropertyRequestDTO request) {
+        return ResponseEntity.ok(propertyService.updateProperty(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteProperty(@PathVariable Long id) {
+        propertyService.deleteProperty(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<PropertyResponseDTO>> searchProperties(
             @RequestParam Double lat,

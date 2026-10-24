@@ -50,6 +50,35 @@ public class PropertyService {
                 .collect(Collectors.toList());
     }
 
+    public List<PropertyResponseDTO> getAllProperties() {
+        return propertyRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public PropertyResponseDTO updateProperty(Long id, PropertyRequestDTO request) {
+        Property property = propertyRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Property not found with id: " + id));
+
+        property.setTitle(request.getTitle());
+        property.setPrice(request.getPrice());
+        property.setLatitude(request.getLatitude());
+        property.setLongitude(request.getLongitude());
+        property.setAreaSqft(request.getAreaSqft());
+
+        Property updated = propertyRepository.save(property);
+        return mapToResponse(updated);
+    }
+
+    @Transactional
+    public void deleteProperty(Long id) {
+        if (!propertyRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Property not found with id: " + id);
+        }
+        propertyRepository.deleteById(id);
+    }
+
     private PropertyResponseDTO mapToResponse(Property property) {
         return PropertyResponseDTO.builder()
                 .id(property.getId())
